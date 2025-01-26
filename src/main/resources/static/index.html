@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Currency Exchange</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+    <script>
+        // Function to handle Currency Conversion
+        async function convertCurrency(event) {
+            event.preventDefault(); // Prevent form submission from reloading the page
+
+            // Get input values
+            const baseCurrency = document.getElementById("baseCurrency").value;
+            const targetCurrency = document.getElementById("targetCurrency").value;
+            const date = document.getElementById("date").value;
+            const amount = document.getElementById("amount").value;
+
+            // Endpoint URL with path parameters
+            const apiUrl = `http://localhost:8080/exchange/${baseCurrency}/${targetCurrency}/${date}/${amount}`;
+
+            try {
+                // Send GET request
+                const response = await fetch(apiUrl, {
+                    method: "GET",
+                });
+
+                // Handle the response
+                if (response.ok) {
+                    const data = await response.json();
+                    // Assuming the response contains a "convertedAmount" field
+                    if (data.convertedAmount !== undefined) {
+                        document.getElementById("conversionResult").textContent = `Converted amount: ${data.convertedAmount}`;
+                    } else {
+                        document.getElementById("conversionResult").textContent = "Error: " + data.error;
+                    }
+                } else {
+                    console.error("Error: " + response.statusText);
+                    alert("Failed to convert currency.");
+                }
+            } catch (error) {
+                console.error("Error: " + error);
+                alert("An error occurred while converting currency.");
+            }
+        }
+
+        // Function to handle Find Exchange Rate search
+        async function findExchangeRate(event) {
+            event.preventDefault(); // Prevent form submission from reloading the page
+
+            // Get input values
+            const baseCurrency = document.getElementById("searchBaseCurrency").value;
+            const targetCurrency = document.getElementById("searchTargetCurrency").value;
+            const date = document.getElementById("searchDate").value;
+
+            // Endpoint URL for fetching exchange rate data
+            const apiUrl = `http://localhost:8080/find/${baseCurrency}/${targetCurrency}/${date}`;
+
+            try {
+                // Send GET request to fetch exchange rate
+                const response = await fetch(apiUrl, {
+                    method: "GET",
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Display the result in the table
+                    const resultTable = document.getElementById("exchangeRateTable");
+                    resultTable.innerHTML = ""; // Clear the previous results
+
+                    // Check if the response contains the expected fields
+                    if (data.date && data.baseCurrency && data.targetCurrency && data.value !== undefined) {
+                        // Create a new row for the result
+                        const row = document.createElement("tr");
+
+                        // Create date cell
+                        const dateCell = document.createElement("td");
+                        dateCell.textContent = data.date;
+                        row.appendChild(dateCell);
+
+                        // Create base currency cell
+                        const baseCurrencyCell = document.createElement("td");
+                        baseCurrencyCell.textContent = data.baseCurrency;
+                        row.appendChild(baseCurrencyCell);
+
+                        // Create target currency cell
+                        const targetCurrencyCell = document.createElement("td");
+                        targetCurrencyCell.textContent = data.targetCurrency;
+                        row.appendChild(targetCurrencyCell);
+
+                        // Create value cell
+                        const valueCell = document.createElement("td");
+                        valueCell.textContent = data.value;
+                        row.appendChild(valueCell);
+
+                        // Append the row to the table
+                        resultTable.appendChild(row);
+                    } else {
+                        const row = document.createElement("tr");
+                        const errorCell = document.createElement("td");
+                        errorCell.colSpan = 4;
+                        errorCell.textContent = "Error: Invalid data returned from server.";
+                        row.appendChild(errorCell);
+                        resultTable.appendChild(row);
+                    }
+                } else {
+                    console.error("Error fetching exchange rate: ", response.statusText);
+                    alert("Error fetching exchange rate.");
+                }
+            } catch (error) {
+                console.error("Error: ", error);
+                alert("An error occurred while fetching exchange rate.");
+            }
+        }
+
+        // Attach the function to the form submit event
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelector("#currencyConverterForm").addEventListener("submit", convertCurrency);
+            document.querySelector("#searchForm").addEventListener("submit", findExchangeRate);
+        });
+    </script>
+</head>
+<body>
+<h1>Currency Exchange Rates</h1>
+
+<!-- Find Exchange Rate Section -->
+<h2>Find Exchange Rate</h2>
+<form id="searchForm">
+    <label for="searchBaseCurrency">Base Currency:</label>
+    <input type="text" id="searchBaseCurrency" name="baseCurrency" placeholder="e.g., USD" required>
+    <br><br>
+
+    <label for="searchTargetCurrency">Target Currency:</label>
+    <input type="text" id="searchTargetCurrency" name="targetCurrency" placeholder="e.g., SEK" required>
+    <br><br>
+
+    <label for="searchDate">Date:</label>
+    <input type="date" id="searchDate" name="date" required>
+    <br><br>
+
+    <button type="submit">Search</button>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Base Currency</th>
+        <th>Target Currency</th>
+        <th>Value</th>
+    </tr>
+    </thead>
+    <tbody id="exchangeRateTable">
+    <!-- Data will be dynamically inserted here -->
+    </tbody>
+</table>
+
+<hr>
+
+<!-- Currency Converter Section -->
+<h3>Currency Converter</h3>
+<form id="currencyConverterForm">
+    <label for="baseCurrency">Base Currency:</label>
+    <input type="text" id="baseCurrency" name="baseCurrency" placeholder="e.g., USD or EUR" required>
+    <br><br>
+
+    <label for="targetCurrency">Target Currency:</label>
+    <input type="text" id="targetCurrency" name="targetCurrency" placeholder="e.g., SEK or USD" required>
+    <br><br>
+
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" name="amount" placeholder="Enter amount to convert" required>
+    <br><br>
+
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" required>
+    <br><br>
+
+    <button type="submit">Convert</button>
+</form>
+
+<h3>Conversion Result</h3>
+<div id="conversionResult"></div>
+
+</body>
+</html>
