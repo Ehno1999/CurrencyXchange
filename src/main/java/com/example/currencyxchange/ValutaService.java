@@ -18,10 +18,13 @@ public class ValutaService {
     public ValutaService(ValutaRepository valutaRepository) {
         this.valutaRepository = valutaRepository;
     }
+
+    // perform Ccalculations baseCurrency*targetCurrency
     public double performCalculations(double value, double amount) {
         System.out.println("Performing calculations...");
         return value * amount;
     }
+
     // Find or create a Valuta record
     public Valuta findOrCreateValuta(String baseCurrency, String targetCurrency, String date) {
         Valuta existingValuta = valutaRepository.findByBaseCurrencyAndTargetCurrencyAndDateIgnoreCase(baseCurrency, targetCurrency, date);
@@ -75,8 +78,7 @@ public class ValutaService {
 
     // Construct URL for creating a Valuta record
     private String createValutaCreationUrl(String baseCurrency, String targetCurrency, String date) {
-        Valuta valuta = new Valuta();
-        return sendover(baseCurrency, targetCurrency, date);
+        return "http://localhost:8080/" + getRealNames(baseCurrency) + "/" + getRealNames(targetCurrency) + "/" + date;
     }
 
     // Send request to create a Valuta record
@@ -93,9 +95,6 @@ public class ValutaService {
         }
     }
 
-    public String sendover(String baseCurrency, String targetCurrency, String date) {
-        return "http://localhost:8080/" + getRealNames(baseCurrency) + "/" + getRealNames(targetCurrency) + "/" + date;
-    }
 
     public String getRealNames(String currency) {
         switch (currency.toUpperCase()) {

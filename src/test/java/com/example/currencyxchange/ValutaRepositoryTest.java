@@ -10,8 +10,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @DataJpaTest
 public class ValutaRepositoryTest {
 
+
+    private final ValutaRepository valutaRepository;
+
     @Autowired
-    private ValutaRepository valutaRepository;
+    public ValutaRepositoryTest(ValutaRepository valutaRepository) {
+        this.valutaRepository = valutaRepository;
+    }
 
     @BeforeEach
     public void setUp() {
