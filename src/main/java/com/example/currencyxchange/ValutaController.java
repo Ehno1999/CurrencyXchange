@@ -20,14 +20,15 @@ public class ValutaController {
     public ValutaController(ValutaService valutaService) {
         this.valutaService = valutaService;
     }
-
+    //start page
     @RequestMapping("/")
     public ModelAndView welcome() {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("index.html");
         return modelAndView;
     }
-
+    //First, it searches for a currency record with the specified base currency, target currency, and date.
+    // If no record is found, a request is sent to create a new currency record, which is then displayed on the frontend.
     @RequestMapping(value = "find/{baseCurrency}/{targetCurrency}/{date}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> findOrCreate(@PathVariable("baseCurrency") String baseCurrency,
                                                             @PathVariable("targetCurrency") String targetCurrency,
@@ -49,7 +50,8 @@ public class ValutaController {
 
         return ResponseEntity.ok(response);
     }
-
+        // First, it searches for a currency record with the specified base currency, target currency, and date.
+        // If no record is found, a request is sent to create a new currency record, and then the calculation is performed.
     @RequestMapping(value = "exchange/{baseCurrency}/{targetCurrency}/{date}/{amount}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, Object>> find(@PathVariable("baseCurrency") String baseCurrency,
                                                     @PathVariable("targetCurrency") String targetCurrency,
@@ -70,7 +72,7 @@ public class ValutaController {
         response.put("convertedAmount", result);
         return ResponseEntity.ok(response);
     }
-
+    //creates a new currency record and stores it in the database.
     @RequestMapping(value = "/{baseCurrency}/{targetCurrency}/{date}", method = RequestMethod.GET)
     public ResponseEntity<String> saveExchangeRate(@PathVariable("baseCurrency") String baseCurrency,
                                                    @PathVariable("targetCurrency") String targetCurrency,
